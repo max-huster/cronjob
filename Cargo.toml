@@ -8,5 +8,5 @@ repository = "https://github.com/TheUberCatman/cronjob"
 keywords = ["cron", "schedule"]
 
 [dependencies]
-cron = "0.11.0"
+cron = { git = "https://github.com/max-huster/cron" }
 chrono = "0.4.19"

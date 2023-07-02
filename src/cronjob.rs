@@ -11,75 +11,28 @@ use command::Command;
 pub struct CronJob {
     name: String,
     command: Box<dyn Command>,
-    seconds: Option<String>,
-    minutes: Option<String>,
-    hours: Option<String>,
-    day_of_month: Option<String>,
-    month: Option<String>,
-    day_of_week: Option<String>,
-    year: Option<String>,
     offset: Option<FixedOffset>,
+    schedule: Schedule,
     interval: u64,
 }
 
 impl CronJob {
     /// Constructs new `CronJob` object.
-    pub fn new<C: Command>(name: &str, command: C) -> Self {
+    pub fn new<C: Command>(name: &str, schedule: Schedule, command: C) -> Self {
+        
         CronJob {
             name: name.to_string(),
             command: Box::new(command),
-            seconds: None,
-            minutes: None,
-            hours: None,
-            day_of_month: None,
-            month: None,
-            day_of_week: None,
-            year: None,
             offset: None,
-            interval: 500,
+            schedule: schedule,
+            interval: 500,            
         }
     }
-
-    pub fn seconds(&mut self, seconds: &str) -> &mut Self {
-        self.seconds = Some(seconds.to_string());
-        self
-    }
-
-    pub fn minutes(&mut self, minutes: &str) -> &mut Self {
-        self.minutes = Some(minutes.to_string());
-        self
-    }
-
-    pub fn hours(&mut self, hours: &str) -> &mut Self {
-        self.hours = Some(hours.to_string());
-        self
-    }
-
-    pub fn day_of_month(&mut self, day_of_month: &str) -> &mut Self {
-        self.day_of_month = Some(day_of_month.to_string());
-        self
-    }
-
-    pub fn month(&mut self, month: &str) -> &mut Self {
-        self.month = Some(month.to_string());
-        self
-    }
-
-    pub fn day_of_week(&mut self, day_of_week: &str) -> &mut Self {
-        self.day_of_week = Some(day_of_week.to_string());
-        self
-    }
-
-    pub fn year(&mut self, year: &str) -> &mut Self {
-        self.year = Some(year.to_string());
-        self
-    }
-
+    
     pub fn offset(&mut self, timezone_offset: i32) -> &mut Self {
         self.offset = Some(FixedOffset::east(timezone_offset));
         self
     }
-
     /// Set checking interval in millis
     pub fn set_checking_interval(&mut self, interval: u64) -> &mut Self {
         self.interval = interval;
@@ -87,19 +40,8 @@ impl CronJob {
     }
 
     /// Returns the schedule for the cronjob, with this you are able to get the next occurences.
-    pub fn get_schedule(&mut self) -> Schedule {
-        let asterix = String::from("*");
-        let cron = format!(
-            "{} {} {} {} {} {} {}",
-            self.seconds.as_ref().unwrap_or(&asterix),
-            self.minutes.as_ref().unwrap_or(&asterix),
-            self.hours.as_ref().unwrap_or(&asterix),
-            self.day_of_month.as_ref().unwrap_or(&asterix),
-            self.month.as_ref().unwrap_or(&asterix),
-            self.day_of_week.as_ref().unwrap_or(&asterix),
-            self.year.as_ref().unwrap_or(&asterix)
-        );
-        Schedule::from_str(&cron).unwrap()
+    pub fn get_schedule(&self) -> Schedule {
+        self.schedule.to_owned()
     }
 
     /// Starts the cronjob without threading.
